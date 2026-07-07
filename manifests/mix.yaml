@@ -8,74 +8,149 @@ version: 1
 mix_name: phi0_mix_v1
 
 datasets:
+  - id: xperience
+    display_name: Xperience
+    path: Phi0-MixCorpus/datasets/xperience/train/xperience_10m_sample
+    action_schema: keypoints_256
+    embodiment: human_egocentric
+    tags: [manipulation, mocap]
+    weight: 1.0
+    supervision: null
+    status: pending
+    notes: |
+      raw: ropedia-ai/xperience-10m-sample（~7.4GB，含 fisheye/rrd）
+      slices: annotation.hdf5 + stereo 视频（~1.85GB 本地副本）
+      processed: pick_{tissue,yellow_box}_xperience_unified（512-d LeRobot）
+      unified 训练入口: datasets/xperience/train/pick_tissue_xperience_unified
+
   - id: egodex
     display_name: EgoDex
-    path: Isaac-GR00T/demo_data/egodex
+    path: Phi0-MixCorpus/datasets/egodex/train/demo_add_remove_lid
     action_schema: keypoints_256
     embodiment: human_egocentric
     tags: [manipulation]
     weight: 1.0
     supervision: null
     status: pending
-    notes: Phi_0 EgoDexDataset 已存在
+    notes: |
+      raw: egodex_dex_{ziyi,wam}, egoverse_full, demo_hf
+      slices: demo_add_remove_lid（本地副本，可离线分析）
+      全量 raw 见 datasets/egodex/raw/
 
   - id: humanoid_everyday
     display_name: Humanoid Everyday
-    path: Phi0-MixCorpus/datasets/humanoid_everyday/train
+    path: Phi0-MixCorpus/datasets/humanoid_everyday/train/he_kettle_one_ep
     action_schema: unified_512
     embodiment: humanoid
     tags: [manipulation]
     weight: 1.0
     supervision: null
     status: pending
+    notes: |
+      raw: USC-GVL/humanoid-everyday 2-episode 切片（hf_slices）
+      slices: he_kettle_one_ep, walk_one_ep（本地副本）
+      全量 HF 尚未下载
 
   - id: t_rex
     display_name: T-Rex
-    path: Phi0-MixCorpus/datasets/t_rex/train
+    path: Phi0-MixCorpus/datasets/t_rex/train/trex_dataset
     action_schema: unified_512
     embodiment: dexterous_hand
     tags: [manipulation, tactile]
     weight: 1.0
     supervision: null
     status: pending
+    notes: |
+      HF: zekaiwang/trex_dataset（LeRobot v3.0，~7900 files）
+      下载: bash datasets/t_rex/scripts/download.sh
+      监控: bash datasets/t_rex/scripts/watch_download.sh
 
   - id: bone_seed
     display_name: Bone-SEED
-    path: Phi0-MixCorpus/datasets/bone_seed/train
+    path: Phi0-MixCorpus/datasets/bone_seed/train/protomotions_g1
     action_schema: unified_512
     embodiment: human_mocap
     tags: [locomotion]
     weight: 1.0
     supervision: null
     status: pending
+    notes: |
+      raw: bones-studio/seed（~71GB，软链）
+      processed: ProtoMotions g1 chunks（~114GB）
 
   - id: phuma
     display_name: PHUMA
-    path: Phi0-MixCorpus/datasets/phuma/train
+    path: Phi0-MixCorpus/datasets/phuma/train/protomotions_g1
     action_schema: unified_512
     embodiment: human_mocap
     tags: [locomotion]
     weight: 1.0
     supervision: null
     status: pending
+    notes: |
+      raw: DAVIAN-Robotics/PHUMA（~23GB）+ phuma-upstream
+      processed: ProtoMotions g1 .pt（~15GB）
 
   - id: sonic_g1
     display_name: Sonic 采集
-    path: Phi0-MixCorpus/datasets/sonic_g1/train
+    path: Phi0-MixCorpus/datasets/sonic_g1/train/g1_manip_sonic_unified
     action_schema: unified_512
     embodiment: g1_humanoid
     tags: [robot_teleop, wholebody, manipulation, locomotion]
     weight: 1.0
     supervision: g1_sonic_deploy
     status: pending
-    notes: 对齐 Phi_0 sonic unified 43s/100a 线
+    notes: |
+      raw: Isaac-GR00T/data 时间戳采集 + json 清单
+      processed: *_sonic_unified / *_valid
+
+  # --- VLN / Navigation (InternData-N1 轨迹数据) ---
 
   - id: r2r
-    display_name: R2R
-    path: Phi0-MixCorpus/datasets/r2r/train
-    action_schema: nav
+    display_name: VLN-CE R2R
+    path: Phi0-MixCorpus/datasets/interndata_n1/raw/vln_ce/traj_data/r2r
+    action_schema: nav_trajectory
     embodiment: mobile_agent
-    tags: [navigation]
+    tags: [navigation, vln, instruction_following, trajectory]
     weight: 1.0
     supervision: null
     status: pending
+    priority: required
+    notes: |
+      【必须】InternData-N1 vln_ce R2R 轨迹（Habitat VLN-CE）
+      标注: interndata_n1/raw/vln_ce/raw_data/r2r/
+      下载: bash datasets/interndata_n1/scripts/download_vln_ce.sh
+
+  - id: rxr
+    display_name: VLN-CE RxR
+    path: Phi0-MixCorpus/datasets/interndata_n1/raw/vln_ce/traj_data/rxr
+    action_schema: nav_trajectory
+    embodiment: mobile_agent
+    tags: [navigation, vln, instruction_following, multilingual, trajectory]
+    weight: 1.0
+    supervision: null
+    status: pending
+    priority: recommended
+    notes: |
+      【强烈建议】InternData-N1 vln_ce RxR 多语言轨迹
+      标注: interndata_n1/raw/vln_ce/raw_data/rxr/
+      下载: bash datasets/interndata_n1/scripts/download_vln_ce.sh（与 R2R 同包）
+
+  - id: vln_pe
+    display_name: InternData-N1 VLN-PE
+    path: Phi0-MixCorpus/datasets/interndata_n1/raw/vln_pe
+    action_schema: nav_trajectory
+    embodiment: humanoid_indoor
+    tags: [navigation, vln, humanoid, trajectory]
+    weight: 0.8
+    supervision: null
+    status: pending
+    priority: recommended
+    notes: |
+      【建议】人形室内导航（InternUtopia VLN-PE）
+      ~95GB；含 RGB-D 轨迹 + LeRobot parquet
+      下载: bash datasets/interndata_n1/scripts/download_vln_pe.sh
+
+  # --- 后续（Qwen-RobotNav 全栈对齐，尚未下载）---
+  # pointnav: Qwen-RobotNav Point Goal ~984K
+  # objnav:   Qwen-RobotNav ObjNav ~2.0M
