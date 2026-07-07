@@ -1,0 +1,81 @@
+# Phi-0 混训注册表
+# path: 相对 workspace 根目录，或绝对路径
+# weight: 采样权重（weighted mixture 用；当前 ConcatDataset 暂均权）
+# supervision: Phi_0 dim_mask_for_dataset() 名；null = 全维监督
+# status: pending | converting | ready
+
+version: 1
+mix_name: phi0_mix_v1
+
+datasets:
+  - id: egodex
+    display_name: EgoDex
+    path: Isaac-GR00T/demo_data/egodex
+    action_schema: keypoints_256
+    embodiment: human_egocentric
+    tags: [manipulation]
+    weight: 1.0
+    supervision: null
+    status: pending
+    notes: Phi_0 EgoDexDataset 已存在
+
+  - id: humanoid_everyday
+    display_name: Humanoid Everyday
+    path: Phi0-MixCorpus/datasets/humanoid_everyday/train
+    action_schema: unified_512
+    embodiment: humanoid
+    tags: [manipulation]
+    weight: 1.0
+    supervision: null
+    status: pending
+
+  - id: t_rex
+    display_name: T-Rex
+    path: Phi0-MixCorpus/datasets/t_rex/train
+    action_schema: unified_512
+    embodiment: dexterous_hand
+    tags: [manipulation, tactile]
+    weight: 1.0
+    supervision: null
+    status: pending
+
+  - id: bone_seed
+    display_name: Bone-SEED
+    path: Phi0-MixCorpus/datasets/bone_seed/train
+    action_schema: unified_512
+    embodiment: human_mocap
+    tags: [locomotion]
+    weight: 1.0
+    supervision: null
+    status: pending
+
+  - id: phuma
+    display_name: PHUMA
+    path: Phi0-MixCorpus/datasets/phuma/train
+    action_schema: unified_512
+    embodiment: human_mocap
+    tags: [locomotion]
+    weight: 1.0
+    supervision: null
+    status: pending
+
+  - id: sonic_g1
+    display_name: Sonic 采集
+    path: Phi0-MixCorpus/datasets/sonic_g1/train
+    action_schema: unified_512
+    embodiment: g1_humanoid
+    tags: [robot_teleop, wholebody, manipulation, locomotion]
+    weight: 1.0
+    supervision: g1_sonic_deploy
+    status: pending
+    notes: 对齐 Phi_0 sonic unified 43s/100a 线
+
+  - id: r2r
+    display_name: R2R
+    path: Phi0-MixCorpus/datasets/r2r/train
+    action_schema: nav
+    embodiment: mobile_agent
+    tags: [navigation]
+    weight: 1.0
+    supervision: null
+    status: pending
