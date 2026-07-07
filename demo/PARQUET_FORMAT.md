@@ -1,5 +1,8 @@
 # demo Parquet 格式说明
 
+> **注意**：本文为 Sonic G1 **原始采集**格式，**不是** Phi-0 训练格式。  
+> 训练用 canonical 格式见 [`PHI0_DATASET_SCHEMA.md`](./PHI0_DATASET_SCHEMA.md)。
+
 本目录包含 **LeRobot / Hugging Face Datasets** 风格的 episode 级 Parquet 文件，用于 G1 人形遥操作（Sonic）采集数据的帧序列存储。
 
 ## 文件概览

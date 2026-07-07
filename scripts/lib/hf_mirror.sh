@@ -79,3 +79,39 @@ hf_mirror_download_repo_files() {
   done
   return $(( failed > 0 ? 1 : 0 ))
 }
+
+hf_mirror_download_repo_tree() {
+  # Args: repo_type repo dest_root log
+  local repo_type="$1" repo="$2" dest_root="$3" log="$4"
+  local segment url curl_args relpath failed=0
+
+  if [[ "$repo_type" == "dataset" ]]; then
+    segment="datasets"
+  elif [[ "$repo_type" == "model" ]]; then
+    segment="models"
+  else
+    segment="$repo_type"
+  fi
+
+  url="${HF_MIRROR_BASE}/api/${segment}/${repo}/tree/main?recursive=1"
+  curl_args=(-fSL --retry 8 --retry-delay 15 --connect-timeout 30 --max-time 0)
+  if [[ -n "${HF_TOKEN:-}" ]]; then
+    curl_args+=(-H "Authorization: Bearer ${HF_TOKEN}")
+  fi
+
+  hf_mirror_log "$log" "LIST ${url}"
+  mapfile -t relpaths < <(curl "${curl_args[@]}" "$url" | python3 -c "
+import json, sys
+for x in json.load(sys.stdin):
+    if x.get('type') == 'file':
+        print(x['path'])
+")
+
+  hf_mirror_log "$log" "files to fetch: ${#relpaths[@]}"
+  for relpath in "${relpaths[@]}"; do
+    if ! hf_mirror_download_file "$repo_type" "$repo" "$relpath" "${dest_root}/${relpath}" "$log"; then
+      failed=$((failed + 1))
+    fi
+  done
+  return $(( failed > 0 ? 1 : 0 ))
+}

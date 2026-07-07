@@ -1,7 +1,8 @@
 # Phi-0 混训注册表
-# path: 相对 workspace 根目录，或绝对路径
-# weight: 采样权重（weighted mixture 用；当前 ConcatDataset 暂均权）
-# supervision: Phi_0 dim_mask_for_dataset() 名；null = 全维监督
+# path: Phi-0 canonical LeRobot v3.0 训练目录（见 demo/PHI0_DATASET_SCHEMA.md）
+# action_schema: 统一为 unified_512（= phi0_action_v1）
+# weight: 采样权重（weighted mixture）
+# supervision: 转换默认 mask 模板名；运行时用 Parquet action.dim_mask
 # status: pending | converting | ready
 
 version: 1
@@ -10,23 +11,23 @@ mix_name: phi0_mix_v1
 datasets:
   - id: xperience
     display_name: Xperience
-    path: Phi0-MixCorpus/datasets/xperience/train/xperience_10m_sample
-    action_schema: keypoints_256
+    path: Phi0-MixCorpus/datasets/xperience/train/pick_tissue_xperience_phi0
+    action_schema: unified_512
     embodiment: human_egocentric
     tags: [manipulation, mocap]
     weight: 1.0
     supervision: null
     status: pending
     notes: |
-      raw: ropedia-ai/xperience-10m-sample（~7.4GB，含 fisheye/rrd）
-      slices: annotation.hdf5 + stereo 视频（~1.85GB 本地副本）
-      processed: pick_{tissue,yellow_box}_xperience_unified（512-d LeRobot）
-      unified 训练入口: datasets/xperience/train/pick_tissue_xperience_unified
+      raw: ropedia-ai/xperience-10m-sample（~7.4GB）
+      转换源: slices/pick_tissue_xperience_unified 或 stereo_left + HDF5
+      单目: stereo_left → observation.images.ego_view
+      转换: datasets/xperience/scripts/convert_to_phi0.py（待实现）
 
   - id: egodex
     display_name: EgoDex
-    path: Phi0-MixCorpus/datasets/egodex/train/demo_add_remove_lid
-    action_schema: keypoints_256
+    path: Phi0-MixCorpus/datasets/egodex/train/demo_add_remove_lid_phi0
+    action_schema: unified_512
     embodiment: human_egocentric
     tags: [manipulation]
     weight: 1.0
@@ -34,12 +35,13 @@ datasets:
     status: pending
     notes: |
       raw: egodex_dex_{ziyi,wam}, egoverse_full, demo_hf
-      slices: demo_add_remove_lid（本地副本，可离线分析）
-      全量 raw 见 datasets/egodex/raw/
+      转换源: slices/demo_add_remove_lid
+      proprio: Sonic SMPL encoder / motion planner 补全（见 PHI0_DATASET_SCHEMA §6）
+      转换: datasets/egodex/scripts/convert_to_phi0.py（待实现）
 
   - id: humanoid_everyday
     display_name: Humanoid Everyday
-    path: Phi0-MixCorpus/datasets/humanoid_everyday/train/he_kettle_one_ep
+    path: Phi0-MixCorpus/datasets/humanoid_everyday/train/he_kettle_one_ep_phi0
     action_schema: unified_512
     embodiment: humanoid
     tags: [manipulation]
@@ -53,7 +55,7 @@ datasets:
 
   - id: t_rex
     display_name: T-Rex
-    path: Phi0-MixCorpus/datasets/t_rex/train/trex_dataset
+    path: Phi0-MixCorpus/datasets/t_rex/train/trex_phi0
     action_schema: unified_512
     embodiment: dexterous_hand
     tags: [manipulation, tactile]
@@ -62,12 +64,13 @@ datasets:
     status: pending
     notes: |
       HF: zekaiwang/trex_dataset（LeRobot v3.0，~7900 files）
+      转换源: raw/trex_dataset → trex_phi0
       下载: bash datasets/t_rex/scripts/download.sh
-      监控: bash datasets/t_rex/scripts/watch_download.sh
+      转换: datasets/t_rex/scripts/convert_to_phi0.py（待实现）
 
   - id: bone_seed
     display_name: Bone-SEED
-    path: Phi0-MixCorpus/datasets/bone_seed/train/protomotions_g1
+    path: Phi0-MixCorpus/datasets/bone_seed/train/protomotions_g1_phi0
     action_schema: unified_512
     embodiment: human_mocap
     tags: [locomotion]
@@ -80,7 +83,7 @@ datasets:
 
   - id: phuma
     display_name: PHUMA
-    path: Phi0-MixCorpus/datasets/phuma/train/protomotions_g1
+    path: Phi0-MixCorpus/datasets/phuma/train/protomotions_g1_phi0
     action_schema: unified_512
     embodiment: human_mocap
     tags: [locomotion]
@@ -93,7 +96,7 @@ datasets:
 
   - id: sonic_g1
     display_name: Sonic 采集
-    path: Phi0-MixCorpus/datasets/sonic_g1/train/g1_manip_sonic_unified
+    path: Phi0-MixCorpus/datasets/sonic_g1/train/g1_manip_sonic_phi0
     action_schema: unified_512
     embodiment: g1_humanoid
     tags: [robot_teleop, wholebody, manipulation, locomotion]
@@ -101,15 +104,16 @@ datasets:
     supervision: g1_sonic_deploy
     status: pending
     notes: |
-      raw: Isaac-GR00T/data 时间戳采集 + json 清单
-      processed: *_sonic_unified / *_valid
+      raw: Isaac-GR00T/data 时间戳采集
+      转换源: processed/g1_manip_sonic_unified
+      转换: datasets/sonic_g1/scripts/convert_to_phi0.py（待实现）
 
-  # --- VLN / Navigation (InternData-N1 轨迹数据) ---
+  # --- VLN / Navigation (InternData-N1 → phi0_action_v1 [0:9) root 段) ---
 
   - id: r2r
     display_name: VLN-CE R2R
-    path: Phi0-MixCorpus/datasets/interndata_n1/raw/vln_ce/traj_data/r2r
-    action_schema: nav_trajectory
+    path: Phi0-MixCorpus/datasets/interndata_n1/train/vln_ce_r2r_phi0
+    action_schema: unified_512
     embodiment: mobile_agent
     tags: [navigation, vln, instruction_following, trajectory]
     weight: 1.0
@@ -117,14 +121,15 @@ datasets:
     status: pending
     priority: required
     notes: |
-      【必须】InternData-N1 vln_ce R2R 轨迹（Habitat VLN-CE）
-      标注: interndata_n1/raw/vln_ce/raw_data/r2r/
+      【必须】InternData-N1 vln_ce R2R；action.dim_mask 仅 [0:9) root 段
+      转换源: raw/vln_ce/traj_data/r2r + raw_data/r2r
+      单目: RGB → ego_view（depth 不入库）
       下载: bash datasets/interndata_n1/scripts/download_vln_ce.sh
 
   - id: rxr
     display_name: VLN-CE RxR
-    path: Phi0-MixCorpus/datasets/interndata_n1/raw/vln_ce/traj_data/rxr
-    action_schema: nav_trajectory
+    path: Phi0-MixCorpus/datasets/interndata_n1/train/vln_ce_rxr_phi0
+    action_schema: unified_512
     embodiment: mobile_agent
     tags: [navigation, vln, instruction_following, multilingual, trajectory]
     weight: 1.0
@@ -132,14 +137,14 @@ datasets:
     status: pending
     priority: recommended
     notes: |
-      【强烈建议】InternData-N1 vln_ce RxR 多语言轨迹
-      标注: interndata_n1/raw/vln_ce/raw_data/rxr/
+      【强烈建议】InternData-N1 vln_ce RxR 多语言；action.dim_mask 仅 [0:9)
+      转换源: raw/vln_ce/traj_data/rxr
       下载: bash datasets/interndata_n1/scripts/download_vln_ce.sh（与 R2R 同包）
 
   - id: vln_pe
     display_name: InternData-N1 VLN-PE
-    path: Phi0-MixCorpus/datasets/interndata_n1/raw/vln_pe
-    action_schema: nav_trajectory
+    path: Phi0-MixCorpus/datasets/interndata_n1/train/vln_pe_phi0
+    action_schema: unified_512
     embodiment: humanoid_indoor
     tags: [navigation, vln, humanoid, trajectory]
     weight: 0.8
@@ -147,8 +152,8 @@ datasets:
     status: pending
     priority: recommended
     notes: |
-      【建议】人形室内导航（InternUtopia VLN-PE）
-      ~95GB；含 RGB-D 轨迹 + LeRobot parquet
+      【建议】人形室内导航 VLN-PE；action.dim_mask 仅 [0:9)
+      转换源: raw/vln_pe/；单目 RGB → ego_view
       下载: bash datasets/interndata_n1/scripts/download_vln_pe.sh
 
   # --- 后续（Qwen-RobotNav 全栈对齐，尚未下载）---

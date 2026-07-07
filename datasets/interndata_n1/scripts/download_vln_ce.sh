@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 DATA_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 LOG="${DATA_ROOT}/logs/download_vln_ce.log"
-LOCK="${DATA_ROOT}/logs/.download_vln_ce.lock"
+LOCK="${DATA_ROOT}/logs/.hf_staging.lock"
 STAGING="${DATA_ROOT}/raw/_hf_staging"
 
 # shellcheck disable=SC1091

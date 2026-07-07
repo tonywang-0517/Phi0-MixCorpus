@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 DATA_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 LOG="${DATA_ROOT}/logs/download_vln_pe.log"
-LOCK="${DATA_ROOT}/logs/.download_vln_pe.lock"
+LOCK="${DATA_ROOT}/logs/.hf_staging.lock"
 STAGING="${DATA_ROOT}/raw/_hf_staging"
 FINAL="${DATA_ROOT}/raw/vln_pe"
 
